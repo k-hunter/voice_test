@@ -1,5 +1,5 @@
 (function(aGlobal) {
-	
+
 	var adhoc = navigator.mozAdhoc;
 	var record = document.getElementById('Start');
 	//var start = $("#Start");
@@ -22,13 +22,37 @@
 	deleteButton.textContent = 'Delete';
 	deleteButton.className = 'delete';
 
-	
+	function send_audio(audiofile)
+	{
+		return new Promise((resolve, reject) => {
+			adhoc.sendPcmVoice(audiofile);//发送话音数据
+			console.log("nnn1");
+			resolve(1);
+		});
+	}
+
+
+	function get_audio()
+	{
+		console.log("nnn3");
+		adhoc.addPcmVoiceListener(function(status, data) {
+			//setTimeout(
+			dump("============================================adhoc,addPcmVoiceListener==========================================");
+			dump("js callback22  navigator.mozAdhoc.addPcmVoiceListener addr="+status);
+			dump("js callback22  navigator.mozAdhoc.addPcmVoiceListener data="+data);
+			//2000);
+		});//添加接收话音回调监听器
+
+	}
+
+
+
 	var audio_file_play;
 	function recorder(){
 		var onSuccess = function(stream) {
 
 			start.onclick = function(){
-				mediaRecorder.start();
+				mediaRecorder.start();//begin to record
 				//console.log(mediaRecorder.state);//recording
 				console.log("开始录音");
 				record.style.background = "red";
@@ -37,7 +61,7 @@
 				record.disabled = true;
 			}
 			stop.onclick = function(){
-				mediaRecorder.stop();
+				mediaRecorder.stop();//stop recording
 				//console.log(mediaRecorder.state);//inactive
 				console.log("停止录音");
 				record.style.background = "";
@@ -47,73 +71,114 @@
 				record.disabled = false;
 			}
 			var mediaRecorder = new MediaRecorder(stream);
-			mediaRecorder.onstop = function(e) {
-				console.log("data available after MediaRecorder.stop() called.");
+			mediaRecorder.onstop = function(e) {//when stop happen, do this 
+				//console.log("data available after MediaRecorder.stop() called.");
 				var audio = document.createElement('audio');
 				audio.controls = true;
 
-				var sdcard = navigator.getDeviceStorage("sdcard");
-				var blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
+				//var sdcard = navigator.getDeviceStorage("sdcard");
+				var blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });//get audio data
 				//var file   = new Blob(["This is a text file."], {type: "text/plain"});
-				console.log(blob);
+				//console.log(blob);
 				//console.log(file);
 
-				//var file=document.getElementById("file").files[0];
+				chunks = [];
 				var reader=new FileReader();
-				var res=reader.readAsText(blob);
+				reader.readAsText(blob,'utf-8');
 				reader.onload=function(e)
 				{
-					//var result=document.getElementById("result");
-					//result.innerHTML=this.result ;
-					console.log(reader.result);
+					var textfile=reader.result;
+					//console.log(textfile);
+					//console.log(reader);
+					
+					send_audio(textfile).then(() => {
+						console.log("nnn2");
+						get_audio();
+					});
 				}
 
+				//将Blob 对象转换成 ArrayBuffer
+/*
+ *                reader.readAsArrayBuffer(blob);
+ *                reader.onload = function (e) { //将 ArrayBufferView  转换成Blob
+ *                    var buf = new Uint8Array(reader.result);
+ *                    console.info(buf); //[228, 184, 173, 230, 150, 135, 229, 173, 151, 231, 172, 166, 228, 184, 178]
+ *
+ *                    reader.readAsText(new Blob([buf]), 'utf-8');
+ *                    reader.onload = function () {
+ *
+ *                        var string2blob = new Blob([buf], {
+ *                            type: 'text/plain'
+ *                        });
+ *
+ *                        console.info(string2blob); //中文字符串
+ *                        adhoc.sendPcmVoice(string2blob);//发送话音数据
+ *                    };
+ *
+ *                    var buf = new DataView(reader.result); //将 ArrayBufferView  转换成Blob
+ *                    console.info(buf); //DataView {}
+ *                    reader.readAsText(new Blob([buf]), 'utf-8');
+ *                    reader.onload = function () {
+ *                        console.info(reader.result); //中文字符串
+ *                    };
+ *                }
+ */
 
 
 
-				var request = sdcard.addNamed(blob, "audio_file1.ogg");
-				request.onsuccess = function () {
-					var name = this.result;
-					console.log('File "' + name + '" successfully wrote on the sdcard storage area');
-				}
+				/*
+				 *var request = sdcard.addNamed(blob, "audio_file1.ogg");
+				 *request.onsuccess = function () {
+				 *    var name = this.result;
+				 *    console.log('File "' + name + '" successfully wrote on the sdcard storage area');
+				 *}
+				 */
 
 				// An error typically occur if a file with the same name already exist
-				request.onerror = function () {
-					console.warn('Unable to write the file: ' + this.error);
-				}
+				/*
+				 *request.onerror = function () {
+				 *    console.warn('Unable to write the file: ' + this.error);
+				 *}
+				 */
 
-				
+				/*
+				 *                var request_get = sdcard.get("audio_file1.ogg");
+				 *
+				 *                request_get.onsuccess = function () {
+				 *                    audio_file_play = this.result;
+				 *                    console.log("Get the file: " + audio_file_play.name);
+				 *                    console.log(audio_file_play);
+				 *                    var audioURL = window.URL.createObjectURL(audio_file_play);
+				 *                    console.log(audioURL);
+				 *                    audio.src = audioURL;
+				 *                    audio.play();
+				 *                }
+				 *                request_get.onerror = function () {
+				 *                    console.warn("Unable to get the file: " + this.error);
+				 *                }
+				 *
+				 */
+
 				clipContainer.appendChild(audio);
 				clipContainer.appendChild(clipLabel);
 				clipContainer.appendChild(deleteButton);
 				soundClips.appendChild(clipContainer);
 
-				var request_get = sdcard.get("audio_file1.ogg");
-
-				request_get.onsuccess = function () {
-					audio_file_play = this.result;
-					console.log("Get the file: " + audio_file_play.name);
-					console.log(audio_file_play);
-					var audioURL = window.URL.createObjectURL(audio_file_play);
-					console.log(audioURL);
-					audio.src = audioURL;
-					audio.play();
-				}
 				deleteButton.onclick = function(e) {
 					evtTgt = e.target;
 					evtTgt.parentNode.parentNode.removeChild(evtTgt.parentNode);
 				}
 
-				request_get.onerror = function () {
-					console.warn("Unable to get the file: " + this.error);
-				}
-
 				audio.controls = true;
-				console.log("recorder stopped");
+				//console.log("recorder stopped");
 			}
 
 			mediaRecorder.ondataavailable = function(e) {
 				chunks.push(e.data);
+				var textfile1=chunks;
+				//console.log("\ntextfile1:\n"+textfile1);
+				//console.log("reader\n"+reader.result);
+				console.log(chunks);
 			}
 		}//onsuceed
 
@@ -121,11 +186,8 @@
 		var onError = function(err) {
 			console.log("错误出现在：　"　+ err);
 		}
-
 		navigator.mediaDevices.getUserMedia(constraints).then(onSuccess,onError);
-
 	}//recorder
-
 
 	function save_audio_file()
 	{
@@ -175,6 +237,7 @@
 
 				//console.info(reader.result); //中文字符串
 				console.info(string2blob); //中文字符串
+				adhoc.sendPcmVoice(string2blob);//发送话音数据
 			};
 
 			//将 ArrayBufferView  转换成Blob
@@ -186,7 +249,6 @@
 			 *    console.info(reader.result); //中文字符串
 			 *};
 			 */
-		adhoc.sendPcmVoice(convertest);//发送话音数据
 		}
 
 	}
@@ -227,9 +289,6 @@
 			dump("============================================adhoc,addPcmVoiceListener==========================================");
 			dump("js callback22  navigator.mozAdhoc.addPcmVoiceListener addr="+status);
 			dump("js callback22  navigator.mozAdhoc.addPcmVoiceListener data="+data);
-			console.log("============================================adhoc,addPcmVoiceListener==========================================");
-			console.log("js callback22  navigator.mozAdhoc.addPcmVoiceListener addr="+status);
-			console.log("js callback22  navigator.mozAdhoc.addPcmVoiceListener data="+data);
 		});//添加接收话音回调监听器
 
 
@@ -243,15 +302,17 @@
 	}
 
 	$(document).ready(function () {
-		$("#Start").on('click',function(e){
-			//test();
-			console.log("start");
-		});
 
 		recorder();
+
+		$("#Start").on('click',function(e){
+			//test();
+			//console.log("start");
+		});
+
 		$("#Stop").on('click',function(e){
 
-			console.log("stop");
+			//console.log("stop");
 		});
 
 
@@ -276,8 +337,9 @@
 		});
 
 		$("#Test").on('click',function(e){
-			console.log("test");
-			test();
+			//console.log("test");
+			//recorder();
+			//test();
 		});
 
 
