@@ -125,16 +125,17 @@
 				audio.controls = true;
 
 				var blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });//get audio data{type:"text/plain"}
-				var abf=blob;
 				//实际调用,测试转换情况及是否可用，
 				arrybuffer_voice_send_recv_play(blob);
 				//arrybuffer_voice_play(blob);//well done
 				chunks = [];
 
-				clipContainer.appendChild(audio);
-				clipContainer.appendChild(clipLabel);
-				clipContainer.appendChild(deleteButton);
-				soundClips.appendChild(clipContainer);
+				/*
+				 *clipContainer.appendChild(audio);
+				 *clipContainer.appendChild(clipLabel);
+				 *clipContainer.appendChild(deleteButton);
+				 *soundClips.appendChild(clipContainer);
+				 */
 
 				deleteButton.onclick = function(e) {
 					evtTgt = e.target;
@@ -261,7 +262,6 @@
 
 		$("#Test").on('click',function(e){
 			//console.log("test");
-			//recorder();
 			test();
 		});
 

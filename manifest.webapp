@@ -1,23 +1,19 @@
 {
-	"name": "Recorder",
+	"name": "HgPcmvoiceTest",
 		"type": "certified",
-		"description": "record your sounds!",
+		"description": "a test app of hg pcmvoice data!",
 		"launch_path": "/index.html",
 		"icons": {
-			"128": "/icons/icon200x200.png"
+			"128": "/icons/adhoc_189.png"
 		},
 		"developer": {
 			"name": "Kylin",
 			"url": "http://www.kylinos.com"
 		},
 		"locales": {
-			"ar": {
-				"name": "Recorder",
-				"description": "Gaia Adhoc"
-			},
 			"en-US": {
-				"name": "Recorder",
-				"description": "Gaia Adhoc"
+				"name": "HgPcmvoiceTest",
+				"description": "Gaia Adhoc api test"
 			}
 		},
 		"permissions": {
