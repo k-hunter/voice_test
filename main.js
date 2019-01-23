@@ -5,22 +5,27 @@
 	//var start = $("#Start");
 	var start = document.getElementById('Start');
 	var stop = document.getElementById('Stop');
-	var soundClips = document.querySelector('.sound-clips');
 
 	var constraints = {audio: true};
 	var chunks = [];
-	var audio_file;
 	stop.disabled = true;
 
-	var clipContainer = document.createElement('article');
-	var clipLabel = document.createElement('p');
-	var audio = document.createElement('audio');
-	var deleteButton = document.createElement('button');
+	function str2arry(Str2arry)
+	{// string with ','
+		return Str2arry.split(',');//str2arry
+	}
 
-	clipContainer.classList.add('clip');
-	audio.setAttribute('controls','');
-	deleteButton.textContent = 'Delete';
-	deleteButton.className = 'delete';
+	function arry2str(Arry2str)
+	{// string with ','
+		return Arry2str.join(',');//arry2str
+	}
+
+	function blob_creator(blob_source)
+	{
+		var blob = new Blob(blob_source, { 'type' : 'audio/ogg; codecs=opus' });//get audio data{type:"text/plain"}
+		return blob;
+	}
+
 
 	var buf,str;
 	// ArrayBuffer转为字符串，参数为ArrayBuffer对象
@@ -43,23 +48,8 @@
 		return buf;
 	}
 
-	function str2arry(Str2arry)
-	{// string with ','
-		return Str2arry.split(',');//str2arry
-	}
 
-	function arry2str(Arry2str)
-	{// string with ','
-		return Arry2str.join(',');//arry2str
-	}
-
-	function blob_creator(blob_source)
-	{
-		var blob = new Blob(blob_source, { 'type' : 'audio/ogg; codecs=opus' });//get audio data{type:"text/plain"}
-		return blob;
-	}
-
-	function voicedatacallback(status, data) {
+	function voicedatacallback(status, data) {//回调中的data中返回的就是底层的语音数据
 		dump("============================================adhoc,addPcmVoiceListener==========================================");
 		dump("js callback22  navigator.mozAdhoc.addPcmVoiceListener addr="+status);
 		dump("js callback22  navigator.mozAdhoc.addPcmVoiceListener data="+data);
@@ -70,10 +60,8 @@
 		console.log(arr_convertest);
 
 		var typedArray = new Uint8Array(arr_convertest);
-		//console.log("voicedata.length:"+typedArray.length+" data="+typedArray); 
-
-		//var string2blob = new Blob([typedArray],{ 'type' : 'audio/ogg; codecs=opus' } );//arry to blob ,and play this blob
 		var string2blob = blob_creator([typedArray]);//create blob
+		var audio = document.createElement('audio');
 		audio.controls = true;
 		var audioURL = window.URL.createObjectURL(string2blob);
 		audio.src = audioURL;
@@ -95,6 +83,34 @@
 			var str_vt = arry2str(typedArray);//arrybuffer to string 
 			console.log(str_vt);
 			adhoc.addPcmVoiceListener_spe_api(voicedatacallback,str_vt);
+		}
+	}
+
+
+	function arrybuffer_voice_play(blob_exch)
+	{//test,可正常播放,不经过so库，原地转换测试
+		console.log(blob_exch);
+		var ab_exch,str_exch;
+		//将Blob 对象转换成 ArrayBuffer
+		var reader = new FileReader();
+		//reader.readAsArrayBuffer(blob_exch,'utf-16');
+		reader.readAsArrayBuffer(blob_exch,'utf-8');
+		reader.onload = function (e) {
+			var abf=reader.result;
+			console.log(abf); 
+			var typedArray = new Uint8Array(abf);
+			console.log(typedArray); 
+			console.log("voicedata.length:"+typedArray.length); // 3
+			var string1=ab2str(abf);
+			ab_exch=str2ab(string1);
+			console.log(ab_exch);
+
+			//var string2blob = new Blob([ab_exch],{ 'type' : 'audio/ogg; codecs=opus' } );
+			var string2blob = new Blob([typedArray],{ 'type' : 'audio/ogg; codecs=opus' } );
+			audio.controls = true;
+			var audioURL = window.URL.createObjectURL(string2blob);
+			audio.src = audioURL;
+			audio.play();
 		}
 	}
 
@@ -123,25 +139,11 @@
 			mediaRecorder.onstop = function(e) {//when stop happen, do this 
 				var audio = document.createElement('audio');
 				audio.controls = true;
-
 				var blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });//get audio data{type:"text/plain"}
 				//实际调用,测试转换情况及是否可用，
 				arrybuffer_voice_send_recv_play(blob);
 				//arrybuffer_voice_play(blob);//well done
 				chunks = [];
-
-				/*
-				 *clipContainer.appendChild(audio);
-				 *clipContainer.appendChild(clipLabel);
-				 *clipContainer.appendChild(deleteButton);
-				 *soundClips.appendChild(clipContainer);
-				 */
-
-				deleteButton.onclick = function(e) {
-					evtTgt = e.target;
-					evtTgt.parentNode.parentNode.removeChild(evtTgt.parentNode);
-				}
-				audio.controls = true;
 			}
 
 			mediaRecorder.ondataavailable = function(e) {
@@ -155,67 +157,7 @@
 		navigator.mediaDevices.getUserMedia(constraints).then(onSuccess,onError);
 	}//recorder
 
-	function arrybuffer_voice_play(blob_exch)
-	{//test,可正常播放,不经过so库，原地转换测试
-		console.log(blob_exch);
-		var ab_exch,str_exch;
-		//将Blob 对象转换成 ArrayBuffer
-		var reader = new FileReader();
-		//reader.readAsArrayBuffer(blob_exch,'utf-16');
-		reader.readAsArrayBuffer(blob_exch,'utf-8');
-		reader.onload = function (e) {
-			var abf=reader.result;
-			console.log(abf); 
-			var typedArray = new Uint8Array(abf);
-			console.log(typedArray); 
-			console.log("voicedata.length:"+typedArray.length); // 3
-			var string1=ab2str(abf);
-			ab_exch=str2ab(string1);
-			console.log(ab_exch);
-
-			//var string2blob = new Blob([ab_exch],{ 'type' : 'audio/ogg; codecs=opus' } );
-			var string2blob = new Blob([typedArray],{ 'type' : 'audio/ogg; codecs=opus' } );
-			audio.controls = true;
-			var audioURL = window.URL.createObjectURL(string2blob);
-			audio.src = audioURL;
-			audio.play();
-		}
-	}
-	
-	
-	function adhoc_tellip()
-	{
-		var convertest = "hellohhahahahahahahahhsffffffffffanananananananiiiiiiiiiiiiiii";
-		//var convertest = "hellohhahahahahahahahh from jsffffffffffanananananananiiiiiiiiiiiiiii";
-		//adhoc.tellLocalIpAddr(convertest);//设置本机自组网ip
-		//adhoc.sendPcmVoice(convertest);//发送话音数据
-		console.log(convertest);
-		adhoc.addPcmVoiceListener_spe_api(voicedatacallback,convertest);
-	}
-
-	function fkab_voice(){
-
-		var convertest = "11,44,77,008,66,44,77,008,66,44,77,008,66,44,77,008,66,44,77,008,66,44,77,008,66,44,77,008,66,44,77,008,66,44,77,008,66,44,77,008,66,44,77,008,66,44,77,008,66";
-		var arr_convertest = convertest.split(',');//str2arry
-		console.log(arr_convertest);
-		adhoc.addPcmVoiceListener_spe_api(voicedatacallback,convertest);
-		//var str_vt = arr_convertest.join(',');
-		//console.log(str_vt);
-	}
-
-	function fkab_test(){
-
-		var typedArray = new Uint8Array([0,1,2]);
-		console.log(typedArray); 
-		console.log(typedArray.length); // 3
-		typedArray[0] = 5;
-		console.log(typedArray); // [5, 1, 2]
-	}
-
-
-
-
-
+		
 	function test()
 	{	
 		//var test_string="hia hie hia";
@@ -223,7 +165,7 @@
 		//adhoc.addPcmVoiceListener_spe_api(voicedatacallback,test_string);
 		//adhoc_tellip();
 		//fkab_test();
-		fkab_voice();
+		//fkab_voice();
 	}
 
 
@@ -238,25 +180,19 @@
 		});
 
 		$("#Stop").on('click',function(e){
-
 			//console.log("stop");
 		});
-
 
 		$("#Save").on('click',function(e){
 			//save_audio_file();
 			console.log("save");
 		}); 
 
-
 		$("#Send").on('click',function(e){
-
 			console.log("send");
 		});
 
-
 		$("#Play").on('click',function(e){
-
 			console.log("play");
 		});
 
@@ -264,19 +200,10 @@
 			//console.log("test");
 			test();
 		});
-
 	});
 
 
 })(window);
-
-
-
-
-
-
-
-
 
 
 
