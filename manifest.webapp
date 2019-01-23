@@ -30,7 +30,6 @@
 				"access": "readwrite"
 			},
 			"device-storage:videos":{ "access": "readwrite" },
-			"device-storage:audios":{ "access": "readwrite" },
 			"device-storage:pictures":{ "access": "readwrite" }
 
 
