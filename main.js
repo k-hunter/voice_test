@@ -27,28 +27,6 @@
 	}
 
 
-	var buf,str;
-	// ArrayBuffer转为字符串，参数为ArrayBuffer对象
-	function ab2str(buf)
-	{
-		//return String.fromCharCode.apply(null, new Uint16Array(buf));
-		return String.fromCharCode.apply(null, new Uint8Array(buf));
-	}
-
-	// 字符串转为ArrayBuffer对象，参数为字符串
-	function str2ab(str)
-	{
-		//var buf = new ArrayBuffer(str.length*3); // 每个字符占用2个字节
-		var buf = new ArrayBuffer(str.length); // 每个字符占用2个字节
-		//var bufView = new Uint16Array(buf);
-		var bufView = new Uint8Array(buf);
-		for (var i=0, strLen=str.length; i<strLen; i++) {
-			bufView[i] = str.charCodeAt(i);
-		}
-		return buf;
-	}
-
-
 	function voicedatacallback(status, data) {//回调中的data中返回的就是底层的语音数据
 		dump("============================================adhoc,addPcmVoiceListener==========================================");
 		dump("js callback22  navigator.mozAdhoc.addPcmVoiceListener addr="+status);
@@ -83,34 +61,6 @@
 			var str_vt = arry2str(typedArray);//arrybuffer to string 
 			console.log(str_vt);
 			adhoc.addPcmVoiceListener_spe_api(voicedatacallback,str_vt);
-		}
-	}
-
-
-	function arrybuffer_voice_play(blob_exch)
-	{//test,可正常播放,不经过so库，原地转换测试
-		console.log(blob_exch);
-		var ab_exch,str_exch;
-		//将Blob 对象转换成 ArrayBuffer
-		var reader = new FileReader();
-		//reader.readAsArrayBuffer(blob_exch,'utf-16');
-		reader.readAsArrayBuffer(blob_exch,'utf-8');
-		reader.onload = function (e) {
-			var abf=reader.result;
-			console.log(abf); 
-			var typedArray = new Uint8Array(abf);
-			console.log(typedArray); 
-			console.log("voicedata.length:"+typedArray.length); // 3
-			var string1=ab2str(abf);
-			ab_exch=str2ab(string1);
-			console.log(ab_exch);
-
-			//var string2blob = new Blob([ab_exch],{ 'type' : 'audio/ogg; codecs=opus' } );
-			var string2blob = new Blob([typedArray],{ 'type' : 'audio/ogg; codecs=opus' } );
-			audio.controls = true;
-			var audioURL = window.URL.createObjectURL(string2blob);
-			audio.src = audioURL;
-			audio.play();
 		}
 	}
 
@@ -157,6 +107,25 @@
 		navigator.mediaDevices.getUserMedia(constraints).then(onSuccess,onError);
 	}//recorder
 
+	////////////////////////////////////////////////////////////////////////////////// //////////////////////////////////////////////////////////////////////////////////
+		//关注以下函数及注释
+	////////////////////////////////////////////////////////////////////////////////// //////////////////////////////////////////////////////////////////////////////////
+	function sendvoicedata_example()
+	{
+		var audio_data_string;//将你的语音数据转成字符串，上面的arrybuffer_voice_send_recv_play()函数，请参考写法，然后自由发挥
+		//测试专用
+		//此接口数据不经过自组网硬件设备间的传递，到libadhocd.so就返回了
+		adhoc.addPcmVoiceListener_spe_api(voicedatacallback,audio_data_string);//此接口测试专用，我这边为调试语音数据解析过程添加的接口，后期可直接删除
+
+		//标准用法:
+		adhoc.addPcmVoiceListener(voicedatacallback);//添加语音数据监听，请自由发挥
+		adhoc.sendPcmVoice(audio_data_string);//发送话音数据
+	}
+		
+	////////////////////////////////////////////////////////////////////////////////// //////////////////////////////////////////////////////////////////////////////////
+		
+		
+		
 		
 	function test()
 	{	
@@ -169,36 +138,40 @@
 	}
 
 
-
 	$(document).ready(function () {
 
 		recorder();
 
 		$("#Start").on('click',function(e){
-			//test();
 			//console.log("start");
+			//alert("采集音频已开启... 请对着话筒讲话，结束请点'stop'按钮!")
 		});
 
 		$("#Stop").on('click',function(e){
 			//console.log("stop");
+			//alert("采集音频结束！");
 		});
 
 		$("#Save").on('click',function(e){
-			//save_audio_file();
-			console.log("save");
+			//console.log("save");
+			alert("打开源码，自由发挥！");
 		}); 
 
 		$("#Send").on('click',function(e){
-			console.log("send");
+			//console.log("send");
+			alert("发送语音或打开源码，自由发挥！");
+			sendvoicedata_example();
 		});
 
 		$("#Play").on('click',function(e){
-			console.log("play");
+			//console.log("play");
+			alert("打开源码，自由发挥！");
 		});
 
 		$("#Test").on('click',function(e){
 			//console.log("test");
-			test();
+			alert("点击'start'按钮对着话筒讲话，结束请点'stop'按钮! 或打开源码，自由发挥！");
+			//test();
 		});
 	});
 
