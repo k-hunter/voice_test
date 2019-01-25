@@ -1,5 +1,5 @@
 {
-	"name": "HgPcmvoiceTest",
+	"name": "HgPcmVoiceTest",
 		"type": "certified",
 		"description": "a test app of hg pcmvoice data!",
 		"launch_path": "/index.html",
@@ -12,7 +12,7 @@
 		},
 		"locales": {
 			"en-US": {
-				"name": "HgPcmvoiceTest",
+				"name": "HgPcmVoiceTest",
 				"description": "Gaia Adhoc api test"
 			}
 		},

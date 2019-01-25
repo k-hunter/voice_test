@@ -126,15 +126,18 @@
 		
 		
 		
-		
-	function test()
+
+		function test()
 	{	
-		//var test_string="hia hie hia";
-		//dump("i                                                   adhoc js :"+test_string);
+		var test_string="hia hia hia";
+		var convertest="hia hia hia from js";
+		//var convertest="hia hie hiahhdjhakjhjkafsdfhsjkafhkjahfjskahfjskhfhjsafkjahfkjahfjkshfdjksahfjkashfjkshfjkahfjksa";//压力测试
+		dump("i                                                   adhoc js :"+test_string);
 		//adhoc.addPcmVoiceListener_spe_api(voicedatacallback,test_string);
-		//adhoc_tellip();
-		//fkab_test();
-		//fkab_voice();
+
+		adhoc.sendDataPri(convertest,  convertest,  convertest, 222);//发送数据
+		adhoc.setIsNeedHeadForUserData(true);//设置用户数据是否需要头部
+		adhoc.setEnabled (false);//设置数据传输模式，ip或非ip true :非ip模式，false :ip模式
 	}
 
 
@@ -169,9 +172,9 @@
 		});
 
 		$("#Test").on('click',function(e){
-			//console.log("test");
-			alert("点击'start'按钮对着话筒讲话，结束请点'stop'按钮! 或打开源码，自由发挥！");
-			//test();
+			console.log("test");
+			//alert("点击'start'按钮对着话筒讲话，结束请点'stop'按钮! 或打开源码，自由发挥！");
+			test();
 		});
 	});
 
