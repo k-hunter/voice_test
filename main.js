@@ -33,7 +33,6 @@
 		dump("js callback22  navigator.mozAdhoc.addPcmVoiceListener data="+data);
 		console.log("callback from C so "+data);
 		
-		//var arr_convertest = data.split(',');//str2arry
 		var arr_convertest = str2arry(data);//str2arry
 		console.log(arr_convertest);
 
@@ -60,9 +59,9 @@
 			console.log(typedArray); 
 			var str_vt = arry2str(typedArray);//arrybuffer to string 
 			console.log(str_vt);
-			adhoc.addPcmVoiceListener_spe_api(voicedatacallback,str_vt);
+			adhoc.addPcmVoiceListener_spe_api(voicedatacallback,str_vt);//发送语音数据并通过voicedatacallback回调回来，播放语音
 		}
-	}
+	}//处理语音blob数据成字符串，通过接口传到so库
 
 
 	function recorder(){
@@ -91,7 +90,7 @@
 				audio.controls = true;
 				var blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });//get audio data{type:"text/plain"}
 				//实际调用,测试转换情况及是否可用，
-				arrybuffer_voice_send_recv_play(blob);
+				arrybuffer_voice_send_recv_play(blob);//将语音blob传给函数
 				//arrybuffer_voice_play(blob);//well done
 				chunks = [];
 			}
@@ -129,15 +128,13 @@
 
 		function test()
 	{	
-		var test_string="hia hia hia";
 		var convertest="hia hia hia from js";
 		//var convertest="hia hie hiahhdjhakjhjkafsdfhsjkafhkjahfjskahfjskhfhjsafkjahfkjahfjkshfdjksahfjkashfjkshfjkahfjksa";//压力测试
-		dump("i                                                   adhoc js :"+test_string);
-		//adhoc.addPcmVoiceListener_spe_api(voicedatacallback,test_string);
-
+		dump("i                                                   adhoc js :"+convertest);
+		adhoc.addPcmVoiceListener_spe_api(voicedatacallback,convertest);
 		adhoc.sendDataPri(convertest,  convertest,  convertest, 222);//发送数据
-		adhoc.setIsNeedHeadForUserData(true);//设置用户数据是否需要头部
-		adhoc.setEnabled (false);//设置数据传输模式，ip或非ip true :非ip模式，false :ip模式
+		//adhoc.setIsNeedHeadForUserData(true);//设置用户数据是否需要头部
+		//adhoc.setEnabled (false);//设置数据传输模式，ip或非ip true :非ip模式，false :ip模式
 	}
 
 
@@ -174,7 +171,7 @@
 		$("#Test").on('click',function(e){
 			console.log("test");
 			//alert("点击'start'按钮对着话筒讲话，结束请点'stop'按钮! 或打开源码，自由发挥！");
-			test();
+			//test();
 		});
 	});
 
